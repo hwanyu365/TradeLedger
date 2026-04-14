@@ -1,0 +1,23 @@
+## Interface: 120000
+## Title: TradeLedger
+## Notes: Announces trade results and keeps a trade ledger.
+## Notes-koKR: 거래 완료/취소 시 채팅 채널에 알리고 거래 장부를 기록합니다.
+## Author: hwanyu365
+## Version: 2.0.0
+## IconTexture: Interface\AddOns\TradeLedger\Media\icon.tga
+## SavedVariables: TradeLedgerDB
+
+Init.lua
+
+Locale\enUS.lua
+Locale\koKR.lua
+
+Core\Config.lua
+Core\Formatter.lua
+Core\History.lua
+Core\AutoMessage.lua
+
+UI\AutoMessageDialog.lua
+UI\Settings.lua
+
+Core\Trade.lua
