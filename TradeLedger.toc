@@ -1,9 +1,9 @@
-## Interface: 120100
+## Interface: 120105
 ## Title: TradeLedger
 ## Notes: Announces trade results and keeps a trade ledger.
 ## Notes-koKR: 거래 완료/취소 시 채팅 채널에 알리고 거래 장부를 기록합니다.
 ## Author: hwanyu365
-## Version: 1.0.1
+## Version: 1.0.2
 ## IconTexture: Interface\AddOns\TradeLedger\Media\icon.tga
 ## SavedVariables: TradeLedgerDB
 ## X-Curse-Project-ID: 1514101
