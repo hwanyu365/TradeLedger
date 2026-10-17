@@ -1,5 +1,10 @@
 # TradeLedger Changelog
 
+## [1.0.2] - 2026-10-18
+
+### Changed
+- Interface 번호를 `120105` (Midnight 12.1.5) 으로 갱신.
+
 ## [1.0.1] - 2026-08-15
 
 ### Changed

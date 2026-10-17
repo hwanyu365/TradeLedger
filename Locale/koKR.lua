@@ -10,7 +10,7 @@ L.TRADE_REQUEST_FROM  = "%s님이 거래를 요청합니다"
 L.SENT                = "보냄"
 L.RECV                = "받음"
 L.NOTHING             = "없음"
-L.LOADED              = "v1.0.1 로드됨. /tl 로 설정 패널 열기"
+L.LOADED              = "v1.0.2 로드됨. /tl 로 설정 패널 열기"
 L.HIGH_VALUE_TRADE    = "고액 거래: %s"
 
 -- Settings UI - Tabs
