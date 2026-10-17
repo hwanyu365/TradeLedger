@@ -8,7 +8,7 @@ L.TRADE_REQUEST_FROM  = "Trade request from %s"
 L.SENT                = "Sent"
 L.RECV                = "Recv"
 L.NOTHING             = "nothing"
-L.LOADED              = "v1.0.1 loaded. /tl to open settings."
+L.LOADED              = "v1.0.2 loaded. /tl to open settings."
 L.HIGH_VALUE_TRADE    = "High-value trade: %s"
 
 -- Settings UI - Tabs

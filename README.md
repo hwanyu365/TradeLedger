@@ -26,7 +26,7 @@ Trade completion/cancellation announcements and trade history ledger for World o
 ## Requirements
 
 - World of Warcraft: Midnight (12.0.0+)
-- Interface: 120000
+- Interface: 120105
 
 ## License
 
