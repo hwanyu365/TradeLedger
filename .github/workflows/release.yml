@@ -11,7 +11,10 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      # 쓰기 토큰이 git 설정에 남으면 빌드 스크립트가 읽을 수 있다. gh 는 GH_TOKEN 으로 동작한다.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Setup luacheck
         run: |
           sudo apt-get update -qq
@@ -19,6 +22,8 @@ jobs:
           sudo luarocks install luacheck
       - run: |
           ./scripts/verify.sh
+      # 산출물 빌드·서명·배포는 스택마다 다르다. 비밀값은 Secrets 로만 넣고, 로그에 값이나 다운로드 URL 이 찍히지 않게 한다.
+      # public 저장소의 Release 첨부물은 누구나 받을 수 있다 → 배포 대상을 제한해야 하면 첨부하지 말고 별도 배포 채널을 쓴다.
       - env:
           GH_TOKEN: ${{ github.token }}
         run: gh release create "$GITHUB_REF_NAME" --generate-notes --verify-tag
