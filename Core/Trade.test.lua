@@ -186,7 +186,12 @@ describe("Trade", function()
             ns.db.goldThreshold = opts.threshold
             support.state.playerMoney, support.state.targetMoney = opts.mine, opts.theirs
             open("Bob")
-            if opts.cancel then fire("TRADE_REQUEST_CANCEL") else complete() end
+            if opts.cancel then
+                fire("TRADE_MONEY_CHANGED")
+                fire("TRADE_REQUEST_CANCEL")
+            else
+                complete()
+            end
             return support.rec.warnings
         end
 
@@ -216,7 +221,7 @@ describe("Trade", function()
         eq(support.rec.chat[#support.rec.chat], { msg = "|cFF00CCFF[TradeLedger]|r Trade request from Alice", r = 0.8, g = 0.8, b = 0.2 })
     end)
 
-    it("TC#29 /tl·/tradeledger: 인자 없음·모르는 인자는 설정 창, add 는 자동 메시지 추가, testdata N 은 장부·자동 메시지에 시험 항목을 넣는다", function()
+    it("TC#29 /tl·/tradeledger: 인자 없음·모르는 인자는 설정 창, add 는 자동 메시지 추가, testdata [N] 은 장부(기본 20건, 최대 개수 안에서)·자동 메시지에 시험 항목을 넣는다", function()
         local ns = support.addon()
         eq(SLASH_TRADELEDGER1, "/tl")
         eq(SLASH_TRADELEDGER2, "/tradeledger")
@@ -238,5 +243,17 @@ describe("Trade", function()
         for _, m in ipairs(ns.db.autoMessages) do eq(m.enabled, false) end
         cmd("testdata 9")
         eq(#ns.db.autoMessages, 8)
+
+        ns = support.addon()
+        SlashCmdList.TRADELEDGER("testdata")
+        eq(#entries(ns), 20)
+        eq(#ns.db.autoMessages, 5)
+
+        ns = support.addon()
+        ns.db.history.maxEntries = 3
+        ns:SaveTrade("real", {}, {}, 0, 0, true)
+        SlashCmdList.TRADELEDGER("testdata 5")
+        eq(#entries(ns), 3)
+        for _, e in ipairs(entries(ns)) do eq(e.partner ~= "real", true) end
     end)
 end)
