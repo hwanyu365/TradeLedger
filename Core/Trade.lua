@@ -38,6 +38,11 @@ end
 local function SendAnnouncement(localLines, chatMsg)
     local db = ns.db
     if not chatMsg then return end
+    if type(localLines) == "table" then
+        for _, line in ipairs(localLines) do DEFAULT_CHAT_FRAME:AddMessage(line) end
+    elseif localLines then
+        DEFAULT_CHAT_FRAME:AddMessage(localLines)
+    end
     if db.channels.GUILD and IsInGuild() then
         C_ChatInfo.SendChatMessage(chatMsg, "GUILD")
     end
