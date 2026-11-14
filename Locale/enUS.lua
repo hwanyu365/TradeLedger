@@ -79,6 +79,6 @@ L.AUTO_MSG_ON             = "ON"
 L.AUTO_MSG_OFF            = "OFF"
 
 -- Settings Reset
-L.SETTINGS_RESET          = "All settings reset to defaults."
+L.SETTINGS_RESET          = "All settings reset to defaults. Auto messages and trade history were cleared."
 L.SETTINGS_RESET_BTN      = "Reset Settings"
-L.SETTINGS_RESET_CONFIRM  = "Are you sure you want to reset all TradeLedger settings?\n\nThis will clear all auto messages and restore defaults."
+L.SETTINGS_RESET_CONFIRM  = "Are you sure you want to reset all TradeLedger settings?\n\nThis will delete all auto messages and trade history, and restore defaults. This cannot be undone."
