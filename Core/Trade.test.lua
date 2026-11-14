@@ -154,7 +154,7 @@ describe("Trade", function()
         eq(entries(ns), {})
     end)
 
-    it("TC#10 켠 채널 중 길드(소속)·파티(그룹)·공격대(공격대)·귓속말(상대 이름 있음)로 보내고, 본인 대화창에는 출력하지 않는다", function()
+    it("TC#10 켠 채널 중 길드(소속)·파티(그룹)·공격대(공격대)·귓속말(상대 이름 있음)로 보내고, 본인 대화창에는 채널과 무관하게 출력한다", function()
         local ns = support.addon({ guild = true, group = true, raid = true })
         for k in pairs(ns.db.channels) do ns.db.channels[k] = true end
         local chatBefore = #support.rec.chat
@@ -163,7 +163,13 @@ describe("Trade", function()
         local types = {}
         for i, s in ipairs(support.rec.sent) do types[i] = s.chatType end
         eq(types, { "GUILD", "PARTY", "RAID", "WHISPER" })
-        eq(#support.rec.chat, chatBefore)
+        local shown = {}
+        for i = chatBefore + 1, #support.rec.chat do shown[#shown + 1] = support.rec.chat[i].msg end
+        eq(shown, {
+            "|cFF00CCFF[TradeLedger]|r Bob trade complete",
+            "  Sent -> nothing",
+            "  Recv <- nothing",
+        })
 
         ns = support.addon()
         for k in pairs(ns.db.channels) do ns.db.channels[k] = true end
@@ -173,10 +179,27 @@ describe("Trade", function()
 
         ns = support.addon({ guild = true, group = true, raid = true })
         for k in pairs(ns.db.channels) do ns.db.channels[k] = false end
+        chatBefore = #support.rec.chat
         open("Bob")
         complete()
         eq(support.rec.sent, {})
         eq(#entries(ns), 1)
+        eq(#support.rec.chat, chatBefore + 3)
+
+        chatBefore = #support.rec.chat
+        open("Bob")
+        fire("TRADE_REQUEST_CANCEL")
+        eq(support.rec.sent, {})
+        eq(#support.rec.chat, chatBefore + 1)
+        eq(support.rec.chat[#support.rec.chat].msg, "|cFF00CCFF[TradeLedger]|r Bob trade cancelled")
+
+        ns.db.announceSuccess, ns.db.announceCancel = false, false
+        chatBefore = #support.rec.chat
+        open("Bob")
+        complete()
+        open("Bob")
+        fire("TRADE_REQUEST_CANCEL")
+        eq(#support.rec.chat, chatBefore)
     end)
 
     it("TC#12 금액 경고는 켜져 있고 기준이 0 보다 클 때, 완료 거래에서 한쪽 골드가 기준 이상이면 큰 쪽 금액으로 띄운다", function()
