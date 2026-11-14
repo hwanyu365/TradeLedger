@@ -185,51 +185,6 @@ local function HandleSlashCommand(input)
         return
     end
 
-    -- Debug: generate test data
-    if cmd == "testdata" then
-        local count = tonumber(args[2]) or 20
-        -- Force-enable history temporarily for test data
-        local wasEnabled = ns.db.history.enabled
-        ns.db.history.enabled = true
-        -- Test history entries
-        for i = 1, count do
-            local success = (math.random() > 0.3)
-            local myItems, theirItems = {}, {}
-            if math.random() > 0.3 then
-                myItems[1] = { name = "Test Item " .. math.random(1, 100), quantity = math.random(1, 5) }
-            end
-            if math.random() > 0.4 then
-                myItems[2] = { name = "Another Item " .. math.random(1, 50), quantity = math.random(1, 10) }
-            end
-            if math.random() > 0.3 then
-                theirItems[1] = { name = "Received Item " .. math.random(1, 100), quantity = math.random(1, 3) }
-            end
-            if math.random() > 0.5 then
-                theirItems[2] = { name = "Bonus Item " .. math.random(1, 30), quantity = 1 }
-            end
-            ns:SaveTrade(
-                "TestPlayer" .. math.random(1, 50),
-                myItems, theirItems,
-                math.random(1, 50000) * 100, math.random(1, 50000) * 100,
-                success
-            )
-        end
-        ns.db.history.enabled = wasEnabled
-        -- Test auto messages (disabled)
-        local channels = { "TRADE", "GUILD", "PARTY", "RAID", "WHISPER" }
-        for i = 1, math.min(count, 5) do
-            ns.db.autoMessages[#ns.db.autoMessages + 1] = {
-                channel  = channels[i],
-                interval = math.random(2, 12) * 5,
-                message  = "Test auto message #" .. i .. " - some sample text here",
-                enabled  = false,
-                target   = (channels[i] == "WHISPER") and ("TestTarget" .. i) or "",
-            }
-        end
-        ns:Print(count .. " test history + " .. math.min(count, 5) .. " auto messages added.")
-        return
-    end
-
     -- Default: open settings panel
     Settings.OpenToCategory(ns.settingsCategory:GetID())
 end
