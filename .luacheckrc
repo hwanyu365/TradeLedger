@@ -19,3 +19,6 @@ globals = {
     "SLASH_TRADELEDGER1",
     "SLASH_TRADELEDGER2",
 }
+
+-- 러너 자기 점검용 fixture 는 일부러 깨진 코드와 전역 대역을 담는다.
+exclude_files = { "scripts/test-fixtures/" }
