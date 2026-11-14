@@ -26,8 +26,13 @@ describe("Trade", function()
         fire("ADDON_LOADED", "TradeLedger")
         eq(ns.db ~= nil, true)
         eq(ns.calls.settings, 1)
-        eq(support.rec.chat[#support.rec.chat].msg, "|cFF00CCFF[TradeLedger]|r v1.0.2 loaded. /tl to open settings.")
+        eq(support.rec.chat[#support.rec.chat].msg, "|cFF00CCFF[TradeLedger]|r v9.9.9 loaded. /tl to open settings.")
         eq(support.rec.frame.events.ADDON_LOADED, nil)
+        eq(support.rec.metadata, { "TradeLedger", "Version" })
+        eq(ns:GetTitle(), "TradeLedger v9.9.9")
+
+        local toc = assert(io.open("TradeLedger.toc", "r")):read("*a")
+        eq(toc:match("\n## Version:%s*(%d+%.%d+%.%d+)%s*\r?\n") ~= nil, true)
 
         ns = support.addon({
             settingsError = "boom",
@@ -41,7 +46,7 @@ describe("Trade", function()
         eq(support.rec.chat[1].msg:find("boom", 1, true) ~= nil, true)
         eq(entries(ns), {})
         eq(ns.autoMessageTimers[1].interval, 30)
-        eq(support.rec.chat[2].msg, "|cFF00CCFF[TradeLedger]|r v1.0.2 loaded. /tl to open settings.")
+        eq(support.rec.chat[2].msg, "|cFF00CCFF[TradeLedger]|r v9.9.9 loaded. /tl to open settings.")
     end)
 
     it("TC#6 거래 상대는 거래창 상대 이름이고, 이름이 없으면 Unknown 이며 귓속말을 보내지 않는다", function()

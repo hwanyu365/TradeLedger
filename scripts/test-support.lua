@@ -87,6 +87,12 @@ function support.stub_wow(opts)
         return f
     end
     SlashCmdList = {}
+    C_AddOns = {
+        GetAddOnMetadata = function(name, field)
+            rec.metadata = { name, field }
+            if name == "TradeLedger" and field == "Version" then return opts.version or "9.9.9" end
+        end,
+    }
     Settings = { OpenToCategory = function(id) rec.opened[#rec.opened + 1] = id end }
 
     TradeLedgerDB = opts.db

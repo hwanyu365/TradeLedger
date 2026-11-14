@@ -32,6 +32,6 @@ files["scripts/test-support.lua"] = {
         "TradeFrameRecipientNameText",
         "GetTradePlayerItemInfo", "GetTradePlayerItemLink", "GetTradeTargetItemInfo", "GetTradeTargetItemLink",
         "GetPlayerTradeMoney", "GetTargetTradeMoney",
-        "CreateFrame", "SlashCmdList", "Settings",
+        "CreateFrame", "SlashCmdList", "Settings", "C_AddOns",
     },
 }

@@ -10,7 +10,8 @@ L.TRADE_REQUEST_FROM  = "%s님이 거래를 요청합니다"
 L.SENT                = "보냄"
 L.RECV                = "받음"
 L.NOTHING             = "없음"
-L.LOADED              = "v1.0.2 로드됨. /tl 로 설정 패널 열기"
+L.LOADED              = "v%s 로드됨. /tl 로 설정 패널 열기"
+L.ADDON_DESC          = "거래 완료/취소 시 채팅 채널에 알리고 거래 장부를 기록합니다."
 L.HIGH_VALUE_TRADE    = "고액 거래: %s"
 
 -- Settings UI - Tabs
