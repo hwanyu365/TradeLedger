@@ -11,9 +11,9 @@ local CHANNEL_DEFS = {
     { key = "GUILD",   localeKey = "AUTO_MSG_CH_GUILD" },
 }
 
-local INTERVAL_MIN = 10
-local INTERVAL_MAX = 600
-local INTERVAL_STEP = 5
+local INTERVAL_MIN = ns.AUTO_MSG_INTERVAL_MIN
+local INTERVAL_MAX = ns.AUTO_MSG_INTERVAL_MAX
+local INTERVAL_STEP = ns.AUTO_MSG_INTERVAL_STEP
 local MARGIN = 16
 
 local function GetChannelDisplay(key)
@@ -262,16 +262,9 @@ function ns:ShowAutoMessageDialog(editIndex, onSave)
 
     -- OK handler
     f.okButton:SetScript("OnClick", function()
-        local sliderVal = f.slider:GetValue()
-        sliderVal = math.floor(sliderVal / INTERVAL_STEP + 0.5) * INTERVAL_STEP
-
-        local entry = {
-            channel  = f.selectedChannel,
-            interval = math.max(INTERVAL_MIN, sliderVal),
-            message  = f.messageEdit:GetText() or "",
-            enabled  = editIndex and self.db.autoMessages[editIndex].enabled or true,
-            target   = f.targetEdit:GetText(),
-        }
+        local previous = editIndex and self.db.autoMessages[editIndex]
+        local entry = self:BuildAutoMessageEntry(previous, f.selectedChannel, f.slider:GetValue(),
+            f.messageEdit:GetText(), f.targetEdit:GetText())
 
         if editIndex then
             self.db.autoMessages[editIndex] = entry

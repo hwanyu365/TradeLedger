@@ -2,6 +2,22 @@ local _, ns = ...
 
 ns.autoMessageTimers = {}
 
+ns.AUTO_MSG_INTERVAL_MIN = 10
+ns.AUTO_MSG_INTERVAL_MAX = 600
+ns.AUTO_MSG_INTERVAL_STEP = 5
+
+function ns:BuildAutoMessageEntry(previous, channel, interval, message, target)
+    local step = self.AUTO_MSG_INTERVAL_STEP
+    interval = math.floor(interval / step + 0.5) * step
+    return {
+        channel  = channel,
+        interval = math.max(self.AUTO_MSG_INTERVAL_MIN, interval),
+        message  = message or "",
+        enabled  = not previous or previous.enabled ~= false,
+        target   = target,
+    }
+end
+
 function ns:SendAutoMessage(entry)
     if not entry or not entry.enabled then return end
     local msg = entry.message
