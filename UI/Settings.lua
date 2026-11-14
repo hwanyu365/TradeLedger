@@ -76,7 +76,7 @@ function ns:InitSettings()
     local mainPanel = CreateFrame("Frame")
     local mainTitle = mainPanel:CreateFontString(nil, "ARTWORK", FONT_TITLE)
     mainTitle:SetPoint("TOPLEFT", MARGIN, TITLE_Y)
-    mainTitle:SetText("TradeLedger v" .. ns.VERSION)
+    mainTitle:SetText(ns:GetTitle())
 
     local mainDesc = mainPanel:CreateFontString(nil, "ARTWORK", FONT_HIGHLIGHT)
     mainDesc:SetPoint("TOPLEFT", MARGIN, -44)

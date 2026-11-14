@@ -29,6 +29,10 @@ describe("Trade", function()
         eq(support.rec.chat[#support.rec.chat].msg, "|cFF00CCFF[TradeLedger]|r v9.9.9 loaded. /tl to open settings.")
         eq(support.rec.frame.events.ADDON_LOADED, nil)
         eq(support.rec.metadata, { "TradeLedger", "Version" })
+        eq(ns:GetTitle(), "TradeLedger v9.9.9")
+
+        local toc = assert(io.open("TradeLedger.toc", "r")):read("*a")
+        eq(toc:match("\n## Version:%s*(%d+%.%d+%.%d+)%s*\r?\n") ~= nil, true)
 
         ns = support.addon({
             settingsError = "boom",

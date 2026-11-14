@@ -80,7 +80,7 @@
 | `TC#2` | 빈 DB → §4 표의 기본값, 부분 DB → 없는 키만 채움(중첩)·있는 값·모르는 키 유지·`SAY`·`PRINT` 삭제 | [NFR#2] | `Core/Config.test.lua` |
 | `TC#3` | `TradeAnnounceDB` 만 있으면 옮기고 옛 전역 삭제, 둘 다 있으면 `TradeLedgerDB` 사용 | [NFR#3] | `Core/Config.test.lua` |
 | `TC#4` | enUS·그 밖 언어 → 영어, koKR → 한국어, 두 로케일 키 집합 같음 | [NFR#4] | `Locale/koKR.test.lua` |
-| `TC#5` | 다른 애드온의 ADDON_LOADED 무시, 자기 것에서 초기화·TOC 버전이 든 로드 안내·이벤트 해제, 패널 실패 시 오류 출력 후 장부 정리·자동 메시지 시작·로드 안내 | [NFR#5, D#8] | `Core/Trade.test.lua` |
+| `TC#5` | 다른 애드온의 ADDON_LOADED 무시, 자기 것에서 초기화·TOC 버전이 든 로드 안내·설정 제목·이벤트 해제, TOC 에 `## Version: X.Y.Z` 가 있음, 패널 실패 시 오류 출력 후 장부 정리·자동 메시지 시작·로드 안내 | [NFR#5, D#8] | `Core/Trade.test.lua` |
 | `TC#25` | 설정 창에 첫 화면(제목의 버전이 애드온 목록의 버전과 같음, 애드온 설명)과 하위 3개 패널이 보이고 `/tl` 로 열림 | [FR#18] | (수동) 게임 내 |
 | `TC#26` | 체크박스 즉시 저장·`/reload` 후 유지, 금액 입력 상한·Enter·Esc·초점 해제 저장, 쉼표 표시, ± 버튼 범위 | [FR#19] | (수동) 게임 내 → 입력 보정·쉼표는 #16 에서 자동 테스트로 |
 | `TC#27` | 초기화 후 같은 표가 기본값(장부·자동 메시지 비움) | [FR#20, D#9] | `Core/Config.test.lua` |
