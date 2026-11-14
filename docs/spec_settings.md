@@ -60,7 +60,7 @@
 | `autoMessages` | 목록 | 빈 목록 | `spec_auto_message.md` §4 |
 | `history` | 표 | `{ enabled = true, maxEntries = 50, entries = {} }` | `spec_trade_history.md` §4 |
 
-- `ns:InitDB()`: 로드 규칙(NFR#2·NFR#3) 적용 후 `ns.db = TradeLedgerDB`
+- `ns:InitDB()`: 로드 규칙(NFR#2) 적용 후 `ns.db = TradeLedgerDB`
 - `ns:ResetDB()`: 같은 표를 비우고 기본값을 채운다 → `ns.db` 와 전역이 같은 표를 계속 가리킨다
 
 ## 6. 동작 로직 및 정책
@@ -78,7 +78,7 @@
 | --- | --- | --- | --- |
 | `TC#1` | TOC 의 SavedVariables 가 `TradeLedgerDB`, 로드 뒤 `ns.db` 와 전역이 같은 표 | [NFR#1] | `Core/Config.test.lua` |
 | `TC#2` | 빈 DB → §4 표의 기본값, 부분 DB → 없는 키만 채움(중첩)·있는 값·모르는 키 유지·`SAY`·`PRINT` 삭제 | [NFR#2] | `Core/Config.test.lua` |
-| `TC#3` | `TradeAnnounceDB` 만 있으면 옮기고 옛 전역 삭제, 둘 다 있으면 `TradeLedgerDB` 사용 | [NFR#3] | `Core/Config.test.lua` |
+| `TC#3` | `TradeAnnounceDB` 만 있어도 새 기본값 DB 를 만들고 옛 전역은 그대로, 둘 다 있으면 `TradeLedgerDB` 사용 | [NFR#3] | `Core/Config.test.lua` |
 | `TC#4` | enUS·그 밖 언어 → 영어, koKR → 한국어, 두 로케일 키 집합 같음 | [NFR#4] | `Locale/koKR.test.lua` |
 | `TC#5` | 다른 애드온의 ADDON_LOADED 무시, 자기 것에서 초기화·로드 안내·이벤트 해제, 패널 실패 시 오류 출력 후 장부 정리·자동 메시지 시작·로드 안내 | [NFR#5, D#8] | `Core/Trade.test.lua` |
 | `TC#25` | 설정 창에 첫 화면과 하위 3개 패널이 보이고 `/tl` 로 열림 | [FR#18] | (수동) 게임 내 |

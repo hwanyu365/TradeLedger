@@ -36,11 +36,6 @@ local function MergeDefaults(target, defaults)
 end
 
 function ns:InitDB()
-    -- Migrate from old TradeAnnounceDB
-    if TradeAnnounceDB and not TradeLedgerDB then
-        TradeLedgerDB = TradeAnnounceDB
-        TradeAnnounceDB = nil
-    end
     if not TradeLedgerDB then
         TradeLedgerDB = {}
     end

@@ -47,8 +47,8 @@
 - `NFR#1` [as-built] 설정·장부·자동 메시지는 계정 전체가 공유하는 SavedVariables `TradeLedgerDB` 하나에 저장한다 (TOC `## SavedVariables`) → 어느 캐릭터로 접속해도 같은 값이다.
 - `NFR#2` [as-built] 로드할 때 없는 키만 기본값으로 채우고(중첩 표 포함), 있는 값과 모르는 키는 바꾸지 않는다. 옛 버전의 알림 채널 `SAY`·`PRINT` 는 지운다.
   - 이전 버전으로 되돌려도(`release.md` §4) 데이터가 손상되지 않아야 한다 → 키를 지우거나 의미를 바꾸는 변경은 하위 호환 방법을 스펙에 먼저 적는다.
-- `NFR#3` [as-built] `TradeLedgerDB` 가 없고 전역 `TradeAnnounceDB`(옛 이름)가 있으면 그 표를 `TradeLedgerDB` 로 옮기고 옛 전역을 지운다.
-  - TOC 가 `TradeAnnounceDB` 를 선언하지 않으므로 옛 애드온을 함께 로드하지 않으면 일어나지 않는다 (#24).
+- `NFR#3` [as-built] 옛 이름의 전역 `TradeAnnounceDB` 는 읽지도 지우지도 않는다.
+  - TOC 는 `TradeLedgerDB` 만 선언한다 → SavedVariables 는 애드온별 파일에서 읽히므로 옛 애드온을 함께 로드하지 않는 한 `TradeAnnounceDB` 는 없다. 옛 데이터를 옮기는 기능은 두지 않는다.
 - `NFR#4` [as-built] 문구는 enUS 를 기본으로 두고, 클라이언트 언어가 koKR 이면 koKR 문구로 덮어쓴다. 두 로케일의 키 집합은 같아야 한다 → 번역이 빠진 키는 영어로 보인다.
 - `NFR#5` [as-built] 자기 애드온의 `ADDON_LOADED` 에서만 초기화한다: DB 로드 → 설정 패널 등록 → 7일 지난 장부 정리 → 켜진 자동 메시지 시작 → 로드 안내 출력. 설정 패널 등록이 실패하면 오류를 대화창에 출력하고 나머지는 계속한다.
 

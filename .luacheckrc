@@ -15,7 +15,6 @@ ignore = {
 -- 애드온이 일부러 만드는 전역. 늘릴 때 이 목록에 적어 의도를 남긴다.
 globals = {
     "TradeLedgerDB",
-    "TradeAnnounceDB",
     "SLASH_TRADELEDGER1",
     "SLASH_TRADELEDGER2",
 }
@@ -33,5 +32,6 @@ files["scripts/test-support.lua"] = {
         "GetTradePlayerItemInfo", "GetTradePlayerItemLink", "GetTradeTargetItemInfo", "GetTradeTargetItemLink",
         "GetPlayerTradeMoney", "GetTargetTradeMoney",
         "CreateFrame", "SlashCmdList", "Settings",
+        "TradeAnnounceDB",
     },
 }
