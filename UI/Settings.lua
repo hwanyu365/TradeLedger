@@ -76,11 +76,11 @@ function ns:InitSettings()
     local mainPanel = CreateFrame("Frame")
     local mainTitle = mainPanel:CreateFontString(nil, "ARTWORK", FONT_TITLE)
     mainTitle:SetPoint("TOPLEFT", MARGIN, TITLE_Y)
-    mainTitle:SetText("TradeLedger v1.0.0")
+    mainTitle:SetText("TradeLedger v" .. ns.VERSION)
 
     local mainDesc = mainPanel:CreateFontString(nil, "ARTWORK", FONT_HIGHLIGHT)
     mainDesc:SetPoint("TOPLEFT", MARGIN, -44)
-    mainDesc:SetText(L.SUCCESS_ALERTS_TIP)
+    mainDesc:SetText(L.ADDON_DESC)
 
     -- Confirm dialogs
     StaticPopupDialogs["TRADELEDGER_RESET_CONFIRM"] = {
