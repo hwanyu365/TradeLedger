@@ -22,3 +22,16 @@ globals = {
 
 -- 러너 자기 점검용 fixture 는 일부러 깨진 코드와 전역 대역을 담는다.
 exclude_files = { "scripts/test-fixtures/" }
+
+-- 테스트 지원 파일은 WoW API 대역을 전역에 둔다 → 대역으로 쓰는 이름만 허용하고 그 밖의 전역 쓰기는 계속 잡는다.
+files["scripts/test-support.lua"] = {
+    globals = {
+        "time", "GetLocale", "wipe",
+        "IsInGuild", "IsInGroup", "IsInRaid", "GetChannelName", "C_ChatInfo",
+        "DEFAULT_CHAT_FRAME", "RaidWarningFrame", "ChatTypeInfo", "RaidNotice_AddMessage", "C_Timer",
+        "TradeFrameRecipientNameText",
+        "GetTradePlayerItemInfo", "GetTradePlayerItemLink", "GetTradeTargetItemInfo", "GetTradeTargetItemLink",
+        "GetPlayerTradeMoney", "GetTargetTradeMoney",
+        "CreateFrame", "SlashCmdList", "Settings",
+    },
+}
