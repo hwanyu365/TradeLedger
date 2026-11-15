@@ -229,7 +229,8 @@ function ns:InitSettings()
         if (self:GetNumber() or 0) > MAX_GOLD then self:SetNumber(MAX_GOLD) end
     end)
     editBox:SetScript("OnEnterPressed", function(self) CommitEditBox(); self:ClearFocus(); ShowFormatted() end)
-    editBox:SetScript("OnEscapePressed", function(self) self:ClearFocus(); ShowFormatted() end)
+    -- ClearFocus 가 OnEditFocusLost 의 저장을 부른다 → 먼저 입력란을 저장된 값으로 되돌려 입력을 버린다.
+    editBox:SetScript("OnEscapePressed", function(self) self:SetNumber(db.goldThreshold); self:ClearFocus(); ShowFormatted() end)
     editBox:SetScript("OnEditFocusLost", function(self) CommitEditBox(); ShowFormatted() end)
 
     local clickOverlay = CreateFrame("Button", nil, tradePanel)

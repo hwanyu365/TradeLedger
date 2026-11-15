@@ -35,3 +35,9 @@ files["scripts/test-support.lua"] = {
         "TradeAnnounceDB",
     },
 }
+
+files["scripts/test-ui-support.lua"] = {
+    globals = {
+        "CreateFrame", "StaticPopupDialogs", "StaticPopup_Show", "YES", "NO", "Settings",
+    },
+}
