@@ -38,6 +38,11 @@ end
 local function SendAnnouncement(localLines, chatMsg)
     local db = ns.db
     if not chatMsg then return end
+    if type(localLines) == "table" then
+        for _, line in ipairs(localLines) do DEFAULT_CHAT_FRAME:AddMessage(line) end
+    elseif localLines then
+        DEFAULT_CHAT_FRAME:AddMessage(localLines)
+    end
     if db.channels.GUILD and IsInGuild() then
         C_ChatInfo.SendChatMessage(chatMsg, "GUILD")
     end
@@ -65,17 +70,19 @@ local function CheckGoldThreshold(myGold, theirGold)
 end
 
 local function AnnounceSuccess()
-    if not ns.db.announceSuccess then return end
-    local localLines = ns:FormatSuccessLocal(tradeState.partner, tradeState.myItems, tradeState.theirItems, tradeState.myGold, tradeState.theirGold)
-    local chatMsg = ns:FormatSuccessChat(tradeState.partner, tradeState.myItems, tradeState.theirItems, tradeState.myGold, tradeState.theirGold)
-    SendAnnouncement(localLines, chatMsg)
+    if ns.db.announceSuccess then
+        local localLines = ns:FormatSuccessLocal(tradeState.partner, tradeState.myItems, tradeState.theirItems, tradeState.myGold, tradeState.theirGold)
+        local chatMsg = ns:FormatSuccessChat(tradeState.partner, tradeState.myItems, tradeState.theirItems, tradeState.myGold, tradeState.theirGold)
+        SendAnnouncement(localLines, chatMsg)
+    end
     CheckGoldThreshold(tradeState.myGold, tradeState.theirGold)
     ns:SaveTrade(tradeState.partner, tradeState.myItems, tradeState.theirItems, tradeState.myGold, tradeState.theirGold, true)
 end
 
 local function AnnounceCancelled()
-    if not ns.db.announceCancel then return end
-    SendAnnouncement(ns:FormatCancelLocal(tradeState.partner), ns:FormatCancelChat(tradeState.partner))
+    if ns.db.announceCancel then
+        SendAnnouncement(ns:FormatCancelLocal(tradeState.partner), ns:FormatCancelChat(tradeState.partner))
+    end
     ns:SaveTrade(tradeState.partner, tradeState.myItems, tradeState.theirItems, tradeState.myGold, tradeState.theirGold, false)
 end
 
@@ -182,51 +189,6 @@ local function HandleSlashCommand(input)
 
     if cmd == "add" then
         ns:ShowAutoMessageDialog(nil, ns.RefreshAutoMessageList)
-        return
-    end
-
-    -- Debug: generate test data
-    if cmd == "testdata" then
-        local count = tonumber(args[2]) or 20
-        -- Force-enable history temporarily for test data
-        local wasEnabled = ns.db.history.enabled
-        ns.db.history.enabled = true
-        -- Test history entries
-        for i = 1, count do
-            local success = (math.random() > 0.3)
-            local myItems, theirItems = {}, {}
-            if math.random() > 0.3 then
-                myItems[1] = { name = "Test Item " .. math.random(1, 100), quantity = math.random(1, 5) }
-            end
-            if math.random() > 0.4 then
-                myItems[2] = { name = "Another Item " .. math.random(1, 50), quantity = math.random(1, 10) }
-            end
-            if math.random() > 0.3 then
-                theirItems[1] = { name = "Received Item " .. math.random(1, 100), quantity = math.random(1, 3) }
-            end
-            if math.random() > 0.5 then
-                theirItems[2] = { name = "Bonus Item " .. math.random(1, 30), quantity = 1 }
-            end
-            ns:SaveTrade(
-                "TestPlayer" .. math.random(1, 50),
-                myItems, theirItems,
-                math.random(1, 50000) * 100, math.random(1, 50000) * 100,
-                success
-            )
-        end
-        ns.db.history.enabled = wasEnabled
-        -- Test auto messages (disabled)
-        local channels = { "TRADE", "GUILD", "PARTY", "RAID", "WHISPER" }
-        for i = 1, math.min(count, 5) do
-            ns.db.autoMessages[#ns.db.autoMessages + 1] = {
-                channel  = channels[i],
-                interval = math.random(2, 12) * 5,
-                message  = "Test auto message #" .. i .. " - some sample text here",
-                enabled  = false,
-                target   = (channels[i] == "WHISPER") and ("TestTarget" .. i) or "",
-            }
-        end
-        ns:Print(count .. " test history + " .. math.min(count, 5) .. " auto messages added.")
         return
     end
 

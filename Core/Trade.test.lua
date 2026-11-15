@@ -98,7 +98,7 @@ describe("Trade", function()
         eq(support.rec.sent[1].msg, "[TradeLedger] Bob: Sent(lp x2, 5g) / Recv(lg, Gone, Late x3, 7g)")
     end)
 
-    it("TC#8 양쪽 수락 뒤 창이 닫히면 완료로 한 번 알리고 장부에 성공으로 남긴다. 완료 알림을 끄면 알림·금액 경고·장부 모두 하지 않는다", function()
+    it("TC#8 양쪽 수락 뒤 창이 닫히면 완료로 한 번 알리고 장부에 성공으로 남긴다. 완료 알림을 끄면 채팅 알림만 하지 않고 금액 경고·장부는 남는다", function()
         local ns = support.addon()
         open("Bob")
         complete()
@@ -116,11 +116,13 @@ describe("Trade", function()
         open("Bob")
         complete()
         eq(support.rec.sent, {})
-        eq(support.rec.warnings, {})
-        eq(entries(ns), {})
+        eq(#support.rec.warnings, 1)
+        eq(#entries(ns), 1)
+        eq(entries(ns)[1].success, true)
+        eq(entries(ns)[1].theirGold, 5000 * GOLD)
     end)
 
-    it("TC#9 취소는 취소 이벤트면 즉시, 수락 없이 창이 닫히면 0.1초 뒤 한 번만 알리고 장부에 실패로 남긴다. 취소 알림을 끄면 둘 다 하지 않는다", function()
+    it("TC#9 취소는 취소 이벤트면 즉시, 수락 없이 창이 닫히면 0.1초 뒤 한 번만 알리고 장부에 실패로 남긴다. 취소 알림을 끄면 채팅 알림만 하지 않고 장부는 남는다", function()
         local ns = support.addon()
         open("Bob")
         fire("TRADE_REQUEST_CANCEL")
@@ -156,10 +158,12 @@ describe("Trade", function()
         fire("TRADE_CLOSED")
         support.run_timers()
         eq(support.rec.sent, {})
-        eq(entries(ns), {})
+        eq(#entries(ns), 2)
+        eq(entries(ns)[1].success, false)
+        eq(entries(ns)[2].success, false)
     end)
 
-    it("TC#10 켠 채널 중 길드(소속)·파티(그룹)·공격대(공격대)·귓속말(상대 이름 있음)로 보내고, 본인 대화창에는 출력하지 않는다", function()
+    it("TC#10 켠 채널 중 길드(소속)·파티(그룹)·공격대(공격대)·귓속말(상대 이름 있음)로 보내고, 본인 대화창에는 채널과 무관하게 출력한다", function()
         local ns = support.addon({ guild = true, group = true, raid = true })
         for k in pairs(ns.db.channels) do ns.db.channels[k] = true end
         local chatBefore = #support.rec.chat
@@ -168,7 +172,13 @@ describe("Trade", function()
         local types = {}
         for i, s in ipairs(support.rec.sent) do types[i] = s.chatType end
         eq(types, { "GUILD", "PARTY", "RAID", "WHISPER" })
-        eq(#support.rec.chat, chatBefore)
+        local shown = {}
+        for i = chatBefore + 1, #support.rec.chat do shown[#shown + 1] = support.rec.chat[i].msg end
+        eq(shown, {
+            "|cFF00CCFF[TradeLedger]|r Bob trade complete",
+            "  Sent -> nothing",
+            "  Recv <- nothing",
+        })
 
         ns = support.addon()
         for k in pairs(ns.db.channels) do ns.db.channels[k] = true end
@@ -178,10 +188,27 @@ describe("Trade", function()
 
         ns = support.addon({ guild = true, group = true, raid = true })
         for k in pairs(ns.db.channels) do ns.db.channels[k] = false end
+        chatBefore = #support.rec.chat
         open("Bob")
         complete()
         eq(support.rec.sent, {})
         eq(#entries(ns), 1)
+        eq(#support.rec.chat, chatBefore + 3)
+
+        chatBefore = #support.rec.chat
+        open("Bob")
+        fire("TRADE_REQUEST_CANCEL")
+        eq(support.rec.sent, {})
+        eq(#support.rec.chat, chatBefore + 1)
+        eq(support.rec.chat[#support.rec.chat].msg, "|cFF00CCFF[TradeLedger]|r Bob trade cancelled")
+
+        ns.db.announceSuccess, ns.db.announceCancel = false, false
+        chatBefore = #support.rec.chat
+        open("Bob")
+        complete()
+        open("Bob")
+        fire("TRADE_REQUEST_CANCEL")
+        eq(#support.rec.chat, chatBefore)
     end)
 
     it("TC#12 금액 경고는 켜져 있고 기준이 0 보다 클 때, 완료 거래에서 한쪽 골드가 기준 이상이면 큰 쪽 금액으로 띄운다", function()
@@ -226,7 +253,7 @@ describe("Trade", function()
         eq(support.rec.chat[#support.rec.chat], { msg = "|cFF00CCFF[TradeLedger]|r Trade request from Alice", r = 0.8, g = 0.8, b = 0.2 })
     end)
 
-    it("TC#29 /tl·/tradeledger: 인자 없음·모르는 인자는 설정 창, add 는 자동 메시지 추가, testdata [N] 은 장부(기본 20건, 최대 개수 안에서)·자동 메시지에 시험 항목을 넣는다", function()
+    it("TC#29 /tl·/tradeledger: 인자 없음·모르는 인자(testdata 포함)는 설정 창, add 는 자동 메시지 추가", function()
         local ns = support.addon()
         eq(SLASH_TRADELEDGER1, "/tl")
         eq(SLASH_TRADELEDGER2, "/tradeledger")
@@ -242,23 +269,10 @@ describe("Trade", function()
 
         ns.db.history.enabled = false
         cmd("testdata 3")
-        eq(#entries(ns), 3)
+        cmd("testdata")
+        eq(#support.rec.opened, 4)
+        eq(entries(ns), {})
+        eq(ns.db.autoMessages, {})
         eq(ns.db.history.enabled, false)
-        eq(#ns.db.autoMessages, 3)
-        for _, m in ipairs(ns.db.autoMessages) do eq(m.enabled, false) end
-        cmd("testdata 9")
-        eq(#ns.db.autoMessages, 8)
-
-        ns = support.addon()
-        SlashCmdList.TRADELEDGER("testdata")
-        eq(#entries(ns), 20)
-        eq(#ns.db.autoMessages, 5)
-
-        ns = support.addon()
-        ns.db.history.maxEntries = 3
-        ns:SaveTrade("real", {}, {}, 0, 0, true)
-        SlashCmdList.TRADELEDGER("testdata 5")
-        eq(#entries(ns), 3)
-        for _, e in ipairs(entries(ns)) do eq(e.partner ~= "real", true) end
     end)
 end)
