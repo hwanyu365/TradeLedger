@@ -65,17 +65,19 @@ local function CheckGoldThreshold(myGold, theirGold)
 end
 
 local function AnnounceSuccess()
-    if not ns.db.announceSuccess then return end
-    local localLines = ns:FormatSuccessLocal(tradeState.partner, tradeState.myItems, tradeState.theirItems, tradeState.myGold, tradeState.theirGold)
-    local chatMsg = ns:FormatSuccessChat(tradeState.partner, tradeState.myItems, tradeState.theirItems, tradeState.myGold, tradeState.theirGold)
-    SendAnnouncement(localLines, chatMsg)
+    if ns.db.announceSuccess then
+        local localLines = ns:FormatSuccessLocal(tradeState.partner, tradeState.myItems, tradeState.theirItems, tradeState.myGold, tradeState.theirGold)
+        local chatMsg = ns:FormatSuccessChat(tradeState.partner, tradeState.myItems, tradeState.theirItems, tradeState.myGold, tradeState.theirGold)
+        SendAnnouncement(localLines, chatMsg)
+    end
     CheckGoldThreshold(tradeState.myGold, tradeState.theirGold)
     ns:SaveTrade(tradeState.partner, tradeState.myItems, tradeState.theirItems, tradeState.myGold, tradeState.theirGold, true)
 end
 
 local function AnnounceCancelled()
-    if not ns.db.announceCancel then return end
-    SendAnnouncement(ns:FormatCancelLocal(tradeState.partner), ns:FormatCancelChat(tradeState.partner))
+    if ns.db.announceCancel then
+        SendAnnouncement(ns:FormatCancelLocal(tradeState.partner), ns:FormatCancelChat(tradeState.partner))
+    end
     ns:SaveTrade(tradeState.partner, tradeState.myItems, tradeState.theirItems, tradeState.myGold, tradeState.theirGold, false)
 end
 
