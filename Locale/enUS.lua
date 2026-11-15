@@ -69,6 +69,8 @@ L.AUTO_MSG_CONFIRM        = "OK"
 L.AUTO_MSG_CANCEL         = "Cancel"
 L.AUTO_MSG_NO_ENTRIES     = "No auto messages configured."
 L.AUTO_MSG_CH_TRADE       = "Trade"
+-- 표시 문구가 아니라 서버가 정한 채널 이름이다 → 번역처럼 다듬으면 거래 채널을 찾지 못한다
+L.TRADE_CHANNEL_NAME      = "Trade"
 L.AUTO_MSG_CH_WHISPER     = "Whisper"
 L.AUTO_MSG_CH_PARTY       = "Party"
 L.AUTO_MSG_CH_RAID        = "Raid"

@@ -3,7 +3,7 @@ local support = load_source("scripts/test-support.lua")
 local function sent() return support.rec.sent end
 
 describe("AutoMessage", function()
-    it("TC#20 켜져 있고 메시지가 있을 때만, 채널 조건이 맞을 때만 보낸다", function()
+    it("TC#20 켜져 있고 메시지가 있을 때만, 채널 조건이 맞을 때만 보내고, 거래 채널은 클라이언트 언어의 채널 이름으로 찾는다", function()
         local ns = support.addon({ guild = true })
         local function send(e) ns:SendAutoMessage(e) end
 
@@ -42,6 +42,12 @@ describe("AutoMessage", function()
         C_ChatInfo.SendChatMessage = function() error("blocked") end
         send({ channel = "TRADE", message = "t", enabled = true })
         raises(function() send({ channel = "GUILD", message = "g", enabled = true }) end, "blocked")
+
+        ns = support.addon({ locale = "koKR" })
+        support.state.tradeChannel = 2
+        ns:SendAutoMessage({ channel = "TRADE", message = "t", enabled = true })
+        eq(support.rec.channelLookup, "거래")
+        eq(sent(), { { msg = "t", chatType = "CHANNEL", target = 2 } })
     end)
 
     it("TC#21 켜진 항목마다 간격(숫자 아니면 60, 1 미만이면 1)의 반복 타이머를 두고, 다시 시작·중지하면 이전 타이머를 끄며, 삭제 뒤 전체 재시작하면 새 순번의 항목을 보낸다", function()

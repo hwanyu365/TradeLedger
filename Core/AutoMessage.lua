@@ -25,7 +25,7 @@ function ns:SendAutoMessage(entry)
 
     local channel = entry.channel
     if channel == "TRADE" then
-        local channelNum = GetChannelName("Trade")
+        local channelNum = GetChannelName(self.L.TRADE_CHANNEL_NAME)
         if channelNum and channelNum > 0 then
             pcall(C_ChatInfo.SendChatMessage, msg, "CHANNEL", nil, channelNum)
         end
