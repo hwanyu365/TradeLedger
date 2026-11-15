@@ -7,9 +7,9 @@ Trade completion/cancellation announcements and trade history ledger for World o
 ## Features
 
 - **Trade Alerts**: Automatically announce trade results to Party, Raid, Guild, or Whisper channels
-- **Trade History**: Keep a ledger of up to 50 recent trades with details
-- **Auto Message**: Timer-based automatic message broadcasting to trade chat
-- **Gold Threshold**: Filter announcements by minimum gold amount
+- **Trade History**: Keep a ledger of up to 50 recent trades with details. Entries older than 7 days are removed when the addon loads
+- **Auto Message**: Send saved messages at a set interval to Trade, Guild, Party, Raid, or Whisper
+- **High-Value Alert**: Show an on-screen warning when either side of a completed trade reaches a set gold amount
 - **Localization**: English and Korean supported
 
 ## Installation
