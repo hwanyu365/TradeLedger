@@ -98,6 +98,7 @@ local eventHandlers = {
         ns:PruneHistory()
         ns:StartAllAutoMessages()
         ns:Print(string.format(ns.L.LOADED, ns.VERSION))
+        ns:NotifyUnsendableAutoMessages()
         frame:UnregisterEvent("ADDON_LOADED")
     end,
 

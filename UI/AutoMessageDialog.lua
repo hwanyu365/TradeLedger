@@ -2,14 +2,10 @@ local _, ns = ...
 
 local dialog = nil
 
--- Channel definitions: { key, displayKey (locale), needsTarget }
-local CHANNEL_DEFS = {
-    { key = "TRADE",   localeKey = "AUTO_MSG_CH_TRADE" },
-    { key = "WHISPER", localeKey = "AUTO_MSG_CH_WHISPER", needsTarget = true },
-    { key = "PARTY",   localeKey = "AUTO_MSG_CH_PARTY" },
-    { key = "RAID",    localeKey = "AUTO_MSG_CH_RAID" },
-    { key = "GUILD",   localeKey = "AUTO_MSG_CH_GUILD" },
-}
+local CHANNEL_DEFS = {}
+for _, key in ipairs(ns.AUTO_MSG_CHANNELS) do
+    CHANNEL_DEFS[#CHANNEL_DEFS + 1] = { key = key, localeKey = "AUTO_MSG_CH_" .. key }
+end
 
 local INTERVAL_MIN = ns.AUTO_MSG_INTERVAL_MIN
 local INTERVAL_MAX = ns.AUTO_MSG_INTERVAL_MAX
@@ -72,7 +68,7 @@ local function EnsureDialog()
     UIDropDownMenu_SetWidth(dropdown, 130)
     f.dropdown = dropdown
 
-    f.selectedChannel = CHANNEL_DEFS[1].key  -- TRADE default
+    f.selectedChannel = ns:AutoMessageDialogChannel(nil)
 
     -- Whisper target EditBox (inline, right of dropdown)
     local tEdit = CreateFrame("EditBox", nil, f, "InputBoxTemplate")
@@ -239,26 +235,26 @@ function ns:ShowAutoMessageDialog(editIndex, onSave)
     f.slider:SetValue(60)
     f.UpdateSliderText(60)
     f.messageEdit:SetText("")
-    f.selectedChannel = CHANNEL_DEFS[1].key
+    f.selectedChannel = self:AutoMessageDialogChannel(nil)
     UIDropDownMenu_SetText(f.dropdown, GetChannelDisplay(f.selectedChannel))
 
     -- Fill existing values for edit
     if editIndex then
         local entry = self.db.autoMessages[editIndex]
         if entry then
-            f.selectedChannel = entry.channel or CHANNEL_DEFS[1].key
+            f.selectedChannel = self:AutoMessageDialogChannel(entry)
             UIDropDownMenu_SetText(f.dropdown, GetChannelDisplay(f.selectedChannel))
             local interval = entry.interval or 60
             interval = math.max(INTERVAL_MIN, math.min(INTERVAL_MAX, interval))
             f.slider:SetValue(interval)
             f.UpdateSliderText(interval)
             f.messageEdit:SetText(entry.message or "")
-            if entry.channel == "WHISPER" then
-                f.targetEdit:Show()
+            if f.selectedChannel == "WHISPER" then
                 f.targetEdit:SetText(entry.target or "")
             end
         end
     end
+    f.targetEdit:SetShown(f.selectedChannel == "WHISPER")
 
     -- OK handler
     f.okButton:SetScript("OnClick", function()

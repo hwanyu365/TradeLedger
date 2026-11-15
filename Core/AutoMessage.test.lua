@@ -3,7 +3,7 @@ local support = load_source("scripts/test-support.lua")
 local function sent() return support.rec.sent end
 
 describe("AutoMessage", function()
-    it("TC#20 켜져 있고 메시지가 있을 때만, 채널 조건이 맞을 때만 보내고, 거래 채널은 클라이언트 언어의 채널 이름으로 찾는다", function()
+    it("TC#20 켜져 있고 메시지가 있을 때만, 채널 조건이 맞을 때만 보내고, 거래 채널에 들어가 있어도 거래 항목은 보내지 않는다", function()
         local ns = support.addon({ guild = true })
         local function send(e) ns:SendAutoMessage(e) end
 
@@ -21,8 +21,8 @@ describe("AutoMessage", function()
         send({ channel = "WHISPER", message = "hi", enabled = true })
         send({ channel = "SAY", message = "hi", enabled = true })
         send({ channel = "TRADE", message = "hi", enabled = true })
+        send({ channel = "UNKNOWN", message = "hi", enabled = true })
         eq(#sent(), 0)
-        eq(support.rec.channelLookup, "Trade")
 
         support.state.guild, support.state.group, support.state.raid = true, true, true
         support.state.tradeChannel = 2
@@ -36,27 +36,21 @@ describe("AutoMessage", function()
             { msg = "p", chatType = "PARTY" },
             { msg = "r", chatType = "RAID" },
             { msg = "w", chatType = "WHISPER", target = "Bob" },
-            { msg = "t", chatType = "CHANNEL", target = 2 },
         })
+        eq(support.rec.channelLookup, nil)
 
         C_ChatInfo.SendChatMessage = function() error("blocked") end
-        send({ channel = "TRADE", message = "t", enabled = true })
         raises(function() send({ channel = "GUILD", message = "g", enabled = true }) end, "blocked")
-
-        ns = support.addon({ locale = "koKR" })
-        support.state.tradeChannel = 2
-        ns:SendAutoMessage({ channel = "TRADE", message = "t", enabled = true })
-        eq(support.rec.channelLookup, "거래")
-        eq(sent(), { { msg = "t", chatType = "CHANNEL", target = 2 } })
     end)
 
-    it("TC#21 켜진 항목마다 간격(숫자 아니면 60, 1 미만이면 1)의 반복 타이머를 두고, 다시 시작·중지하면 이전 타이머를 끄며, 삭제 뒤 전체 재시작하면 새 순번의 항목을 보낸다", function()
+    it("TC#21 켜진 항목마다(거래 항목 제외) 간격(숫자 아니면 60, 1 미만이면 1)의 반복 타이머를 두고, 다시 시작·중지하면 이전 타이머를 끄며, 삭제 뒤 전체 재시작하면 새 순번의 항목을 보낸다", function()
         local ns = support.addon({ guild = true })
         local list = ns.db.autoMessages
         list[1] = { channel = "GUILD", message = "a", enabled = true, interval = 30 }
         list[2] = { channel = "GUILD", message = "b", enabled = false, interval = 30 }
         list[3] = { channel = "GUILD", message = "c", enabled = true, interval = "abc" }
         list[4] = { channel = "GUILD", message = "d", enabled = true, interval = 0 }
+        list[5] = { channel = "TRADE", message = "e", enabled = true, interval = 30 }
 
         ns:StartAllAutoMessages()
         local t = ns.autoMessageTimers
@@ -64,6 +58,7 @@ describe("AutoMessage", function()
         eq(t[2], nil)
         eq(t[3].interval, 60)
         eq(t[4].interval, 1)
+        eq(t[5], nil)
 
         t[1].fn()
         eq(support.rec.sent, { { msg = "a", chatType = "GUILD" } })
@@ -79,7 +74,7 @@ describe("AutoMessage", function()
         local third = t[3]
         ns:RestartAllAutoMessages()
         eq(third.cancelled, true)
-        eq(t[1] ~= nil and t[3] ~= nil and t[4] ~= nil and t[2] == nil, true)
+        eq(t[1] ~= nil and t[3] ~= nil and t[4] ~= nil and t[2] == nil and t[5] == nil, true)
 
         ns:StopAllAutoMessages()
         eq(next(ns.autoMessageTimers), nil)
@@ -105,5 +100,43 @@ describe("AutoMessage entry", function()
 
         eq(ns:BuildAutoMessageEntry({ enabled = true }, "GUILD", 60, "x", "").enabled, true)
         eq(ns:BuildAutoMessageEntry({ enabled = false }, "GUILD", 60, "x", "").enabled, false)
+    end)
+end)
+
+describe("AutoMessage channels", function()
+    it("TC#33 거래는 보낼 수 있는 채널이 아니고, 편집 대화상자는 그런 항목을 기본 채널로 보여 주며, 로드할 때 거래 항목이 있으면 한 번 안내한다", function()
+        local ns = support.addon()
+        eq(ns.AUTO_MSG_CHANNELS, { "WHISPER", "PARTY", "RAID", "GUILD" })
+        eq(ns:IsAutoMessageChannel("GUILD"), true)
+        eq(ns:IsAutoMessageChannel("TRADE"), false)
+        eq(ns:AutoMessageDialogChannel(nil), "WHISPER")
+        eq(ns:AutoMessageDialogChannel({ channel = "TRADE" }), "WHISPER")
+        eq(ns:AutoMessageDialogChannel({ channel = "UNKNOWN" }), "WHISPER")
+        eq(ns:AutoMessageDialogChannel({ channel = "GUILD" }), "GUILD")
+
+        local blocked = "|cFF00CCFF[TradeLedger]|r Auto messages to the Trade channel are blocked by WoW and are not sent. Edit them to another channel or delete them."
+        local function loaded(opts)
+            support.addon(opts)
+            local found = 0
+            for _, line in ipairs(support.rec.chat) do
+                if line.msg:find("Trade channel", 1, true) or line.msg:find("거래 채널", 1, true) then found = found + 1 end
+            end
+            return found, support.rec.chat[#support.rec.chat].msg
+        end
+
+        local guildOnly = { autoMessages = { { channel = "GUILD", message = "g", enabled = true, interval = 60 } } }
+        eq((loaded({ db = guildOnly })), 0)
+
+        local withTrade = { autoMessages = {
+            { channel = "TRADE", message = "a", enabled = false, interval = 60 },
+            { channel = "TRADE", message = "b", enabled = true, interval = 60 },
+        } }
+        local n, last = loaded({ db = withTrade })
+        eq(n, 1)
+        eq(last, blocked)
+
+        n, last = loaded({ db = withTrade, locale = "koKR" })
+        eq(n, 1)
+        eq(last, "|cFF00CCFF[TradeLedger]|r 거래 채널 자동 메시지는 WoW 가 막아 보내지 않습니다. 다른 채널로 편집하거나 삭제하세요.")
     end)
 end)

@@ -660,7 +660,7 @@ function ns:InitSettings()
             msgText:SetMaxLines(1)
             msgText:SetText((entry.message or ""):gsub("\n", " "))
 
-            if not entry.enabled then
+            if not entry.enabled or not ns:IsAutoMessageChannel(entry.channel) then
                 chText:SetTextColor(0.5, 0.5, 0.5)
                 intText:SetTextColor(0.5, 0.5, 0.5)
                 msgText:SetTextColor(0.5, 0.5, 0.5)

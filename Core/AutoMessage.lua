@@ -6,6 +6,30 @@ ns.AUTO_MSG_INTERVAL_MIN = 10
 ns.AUTO_MSG_INTERVAL_MAX = 600
 ns.AUTO_MSG_INTERVAL_STEP = 5
 
+-- 거래 같은 공개 채널은 WoW 가 사용자 입력 없이 보낸 메시지를 막는다 → 타이머로 보낼 수 있는 채널만 둔다.
+ns.AUTO_MSG_CHANNELS = { "WHISPER", "PARTY", "RAID", "GUILD" }
+
+function ns:IsAutoMessageChannel(channel)
+    for _, key in ipairs(self.AUTO_MSG_CHANNELS) do
+        if key == channel then return true end
+    end
+    return false
+end
+
+function ns:AutoMessageDialogChannel(entry)
+    if entry and self:IsAutoMessageChannel(entry.channel) then return entry.channel end
+    return self.AUTO_MSG_CHANNELS[1]
+end
+
+function ns:NotifyUnsendableAutoMessages()
+    for _, entry in ipairs(self.db.autoMessages) do
+        if not self:IsAutoMessageChannel(entry.channel) then
+            self:Print(self.L.AUTO_MSG_TRADE_BLOCKED)
+            return
+        end
+    end
+end
+
 function ns:BuildAutoMessageEntry(previous, channel, interval, message, target)
     local step = self.AUTO_MSG_INTERVAL_STEP
     interval = math.floor(interval / step + 0.5) * step
@@ -24,12 +48,7 @@ function ns:SendAutoMessage(entry)
     if not msg or msg == "" then return end
 
     local channel = entry.channel
-    if channel == "TRADE" then
-        local channelNum = GetChannelName(self.L.TRADE_CHANNEL_NAME)
-        if channelNum and channelNum > 0 then
-            pcall(C_ChatInfo.SendChatMessage, msg, "CHANNEL", nil, channelNum)
-        end
-    elseif channel == "GUILD" and IsInGuild() then
+    if channel == "GUILD" and IsInGuild() then
         C_ChatInfo.SendChatMessage(msg, "GUILD")
     elseif channel == "PARTY" and IsInGroup() then
         C_ChatInfo.SendChatMessage(msg, "PARTY")
@@ -43,7 +62,7 @@ end
 function ns:StartAutoMessage(index)
     self:StopAutoMessage(index)
     local entry = self.db.autoMessages[index]
-    if not entry or not entry.enabled then return end
+    if not entry or not entry.enabled or not self:IsAutoMessageChannel(entry.channel) then return end
     local interval = tonumber(entry.interval) or 60
     if interval < 1 then interval = 1 end
 
