@@ -87,3 +87,17 @@ describe("AutoMessage", function()
         eq(support.rec.sent, { { msg = "c", chatType = "GUILD" }, { msg = "d", chatType = "GUILD" } })
     end)
 end)
+
+describe("AutoMessage entry", function()
+    it("TC#30 저장 값은 간격을 5초 단위로 반올림(최소 10)하고, 새 항목은 켜고 편집은 편집 전 켜짐·꺼짐을 유지한다", function()
+        local ns = support.addon()
+        eq(ns:BuildAutoMessageEntry(nil, "TRADE", 62, "hi", ""),
+            { channel = "TRADE", interval = 60, message = "hi", enabled = true, target = "" })
+        eq(ns:BuildAutoMessageEntry(nil, "WHISPER", 63, nil, "Bob"),
+            { channel = "WHISPER", interval = 65, message = "", enabled = true, target = "Bob" })
+        eq(ns:BuildAutoMessageEntry(nil, "GUILD", 3, "x", "").interval, 10)
+
+        eq(ns:BuildAutoMessageEntry({ enabled = true }, "GUILD", 60, "x", "").enabled, true)
+        eq(ns:BuildAutoMessageEntry({ enabled = false }, "GUILD", 60, "x", "").enabled, false)
+    end)
+end)
