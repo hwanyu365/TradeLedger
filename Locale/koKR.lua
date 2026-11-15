@@ -81,6 +81,6 @@ L.AUTO_MSG_ON             = "활성"
 L.AUTO_MSG_OFF            = "비활성"
 
 -- Settings Reset
-L.SETTINGS_RESET          = "모든 설정이 초기화되었습니다."
+L.SETTINGS_RESET          = "모든 설정이 초기화되었습니다. 자동 메시지와 거래 기록도 삭제되었습니다."
 L.SETTINGS_RESET_BTN      = "설정 초기화"
-L.SETTINGS_RESET_CONFIRM  = "모든 TradeLedger 설정을 초기화하시겠습니까?\n\n자동 메시지 설정 등 모든 설정이 기본값으로 복원됩니다."
+L.SETTINGS_RESET_CONFIRM  = "모든 TradeLedger 설정을 초기화하시겠습니까?\n\n모든 설정이 기본값으로 복원되고, 자동 메시지와 거래 기록이 모두 삭제됩니다. 되돌릴 수 없습니다."
