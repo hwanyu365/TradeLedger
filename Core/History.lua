@@ -50,3 +50,51 @@ function ns:ClearHistory()
     self:Print(self.L.HISTORY_CLEARED)
     if self.RefreshHistoryPanel then self:RefreshHistoryPanel() end
 end
+
+function ns:FormatEntryItems(items, gold)
+    local parts = {}
+    for slot = 1, 7 do
+        if items[slot] then
+            local s = items[slot].name
+            if items[slot].quantity and items[slot].quantity > 1 then
+                s = s .. " x" .. items[slot].quantity
+            end
+            parts[#parts + 1] = s
+        end
+    end
+    local money = self:FormatMoney(gold)
+    if money then parts[#parts + 1] = money end
+    return #parts > 0 and table.concat(parts, ", ") or "-"
+end
+
+local function StatusText(L, success)
+    if success then return "|cFF00FF00" .. L.HISTORY_OK .. "|r" end
+    return "|cFFFF0000" .. L.HISTORY_FAIL .. "|r"
+end
+
+function ns:HistoryDetail(e)
+    return {
+        time    = date("%Y-%m-%d %H:%M:%S", e.time),
+        status  = StatusText(self.L, e.success),
+        partner = e.partner or "?",
+        sent    = self:FormatEntryItems(e.myItems, e.myGold),
+        recv    = self:FormatEntryItems(e.theirItems, e.theirGold),
+    }
+end
+
+function ns:HistoryRows()
+    local entries = self.db.history.entries
+    local rows = {}
+    for i = #entries, 1, -1 do
+        local e = entries[i]
+        rows[#rows + 1] = {
+            entry   = e,
+            time    = date("%m/%d %H:%M", e.time),
+            status  = StatusText(self.L, e.success),
+            partner = e.partner or "?",
+            sent    = self:FormatEntryItems(e.myItems, e.myGold),
+            recv    = self:FormatEntryItems(e.theirItems, e.theirGold),
+        }
+    end
+    return rows
+end

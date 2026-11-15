@@ -27,6 +27,7 @@ function support.stub_wow(opts)
     local st = support.state
 
     time = function() return support.now end
+    date = os.date
     GetLocale = function() return opts.locale or "enUS" end
     wipe = function(t)
         for k in pairs(t) do t[k] = nil end

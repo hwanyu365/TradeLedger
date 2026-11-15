@@ -63,3 +63,34 @@ describe("History", function()
         eq(plain.db.history.entries, {})
     end)
 end)
+
+describe("History panel text", function()
+    it("TC#35 장부 목록은 최신 순이고, 줄·상세는 시각 형식·결과 색·상대·아이템과 골드 요약을 보여 준다", function()
+        local ns = support.addon()
+        local t1 = os.time({ year = 2026, month = 11, day = 5, hour = 9, min = 7, sec = 3 })
+        local t2 = os.time({ year = 2026, month = 11, day = 15, hour = 21, min = 30, sec = 59 })
+        local older = { time = t1, partner = "Bob", success = true, myGold = 10203, theirGold = 0,
+            myItems = { [3] = { name = "Ore", quantity = 1 }, [1] = { name = "Potion", quantity = 3 } }, theirItems = {} }
+        local newer = { time = t2, success = false, myGold = 0, theirGold = 50000, myItems = {}, theirItems = {} }
+        ns.db.history.entries = { older, newer }
+
+        local rows = ns:HistoryRows()
+        eq(#rows, 2)
+        eq(rows[1].entry, newer)
+        eq(rows[2], { entry = older, time = "11/05 09:07", status = "|cFF00FF00OK|r", partner = "Bob",
+            sent = "Potion x3, Ore, 1g2s3c", recv = "-" })
+        eq(rows[1].status, "|cFFFF0000Cancel|r")
+        eq(rows[1].partner, "?")
+        eq(rows[1].recv, "5g")
+
+        eq(ns:HistoryDetail(newer), { time = "2026-11-15 21:30:59", status = "|cFFFF0000Cancel|r", partner = "?",
+            sent = "-", recv = "5g" })
+
+        ns.db.history.entries = {}
+        eq(ns:HistoryRows(), {})
+
+        local ko = support.addon({ locale = "koKR" })
+        eq(ko:HistoryDetail(older).status, "|cFF00FF00성공|r")
+        eq(ko:HistoryDetail(newer).status, "|cFFFF0000취소|r")
+    end)
+end)
