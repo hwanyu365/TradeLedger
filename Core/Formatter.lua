@@ -74,3 +74,20 @@ end
 function ns:FormatIncomingLocal(name)
     return PREFIX .. " " .. string.format(self.L.TRADE_REQUEST_FROM, name)
 end
+
+ns.GOLD_THRESHOLD_MAX = 10000000
+
+function ns:ClampGoldThreshold(n)
+    return math.min(self.GOLD_THRESHOLD_MAX, math.max(0, math.floor(n)))
+end
+
+function ns:FormatWithCommas(n)
+    local s = tostring(n)
+    local pos = #s % 3
+    if pos == 0 then pos = 3 end
+    local parts = { s:sub(1, pos) }
+    for i = pos + 1, #s, 3 do
+        parts[#parts + 1] = s:sub(i, i + 2)
+    end
+    return table.concat(parts, ",")
+end

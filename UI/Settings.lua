@@ -171,7 +171,7 @@ function ns:InitSettings()
         function(v) db.goldThresholdEnabled = v end)
     y = y - CHECKBOX_SPACING
 
-    local MAX_GOLD = 10000000
+    local MAX_GOLD = ns.GOLD_THRESHOLD_MAX
 
     editBox = CreateFrame("EditBox", nil, tradePanel, "InputBoxTemplate")
     editBox:SetSize(90, ROW_HEIGHT)
@@ -187,19 +187,8 @@ function ns:InitSettings()
     local displayLabel = tradePanel:CreateFontString(nil, "ARTWORK", FONT_HIGHLIGHT)
     displayLabel:SetPoint("LEFT", editBox, "LEFT", 4, 0)
 
-    local function FormatWithCommas(n)
-        local s = tostring(n)
-        local pos = #s % 3
-        if pos == 0 then pos = 3 end
-        local parts = { s:sub(1, pos) }
-        for i = pos + 1, #s, 3 do
-            parts[#parts + 1] = s:sub(i, i + 2)
-        end
-        return table.concat(parts, ",")
-    end
-
     local function ShowFormatted()
-        displayLabel:SetText(FormatWithCommas(db.goldThreshold))
+        displayLabel:SetText(ns:FormatWithCommas(db.goldThreshold))
         displayLabel:Show()
         editBox:Hide()
     end
@@ -211,7 +200,7 @@ function ns:InitSettings()
     end
 
     local function UpdateThreshold(newVal)
-        newVal = math.min(MAX_GOLD, math.max(0, math.floor(newVal)))
+        newVal = ns:ClampGoldThreshold(newVal)
         db.goldThreshold = newVal
         if editBox:IsShown() and editBox:HasFocus() then
             editBox:SetNumber(newVal)
@@ -385,36 +374,17 @@ function ns:InitSettings()
         dRecvLbl, dRecvVal,
     }
 
-    local function FormatEntryItems(items, gold)
-        local parts = {}
-        for slot = 1, 7 do
-            if items[slot] then
-                local s = items[slot].name
-                if items[slot].quantity and items[slot].quantity > 1 then
-                    s = s .. " x" .. items[slot].quantity
-                end
-                parts[#parts + 1] = s
-            end
-        end
-        local money = ns:FormatMoney(gold)
-        if money then parts[#parts + 1] = money end
-        return #parts > 0 and table.concat(parts, ", ") or "-"
-    end
-
     local function ShowDetail(e)
         detailEmpty:Hide()
         for _, w in ipairs(allDetailWidgets) do w:Show() end
 
         SetScrollChildWidth(detailScroll, detailChild)
 
-        dTimeVal:SetText(date("%Y-%m-%d %H:%M:%S", e.time))
-        if e.success then
-            dStatusVal:SetText("|cFF00FF00" .. L.HISTORY_OK .. "|r")
-        else
-            dStatusVal:SetText("|cFFFF0000" .. L.HISTORY_FAIL .. "|r")
-        end
-        dPartnerVal:SetText(e.partner or "?")
-        dSentVal:SetText(FormatEntryItems(e.myItems, e.myGold))
+        local d = ns:HistoryDetail(e)
+        dTimeVal:SetText(d.time)
+        dStatusVal:SetText(d.status)
+        dPartnerVal:SetText(d.partner)
+        dSentVal:SetText(d.sent)
 
         dRecvLbl:ClearAllPoints()
         dRecvVal:ClearAllPoints()
@@ -422,7 +392,7 @@ function ns:InitSettings()
         dRecvVal:SetPoint("TOPLEFT", dSentVal, "BOTTOMLEFT", 0, -6)
         dRecvVal:SetPoint("RIGHT", detailChild, "RIGHT", 0, 0)
         dRecvVal:SetWordWrap(true)
-        dRecvVal:SetText(FormatEntryItems(e.theirItems, e.theirGold))
+        dRecvVal:SetText(d.recv)
 
         C_Timer.After(0, function()
             local bottom = -(dRecvVal:GetBottom() or 0) + (detailChild:GetTop() or 0) + 10
@@ -455,8 +425,8 @@ function ns:InitSettings()
 
         histCheckbox:SetChecked(db.history.enabled)
 
-        local entries = db.history.entries
-        local count = #entries
+        local rows = ns:HistoryRows()
+        local count = #rows
 
         if count == 0 then
             histNoEntries:Show()
@@ -468,8 +438,8 @@ function ns:InitSettings()
         SetScrollChildWidth(histScroll, scrollChild)
         scrollChild:SetHeight(math.max(1, count * ROW_HEIGHT))
 
-        for displayIdx = 1, count do
-            local e = entries[count - displayIdx + 1]
+        for displayIdx, r in ipairs(rows) do
+            local e = r.entry
             local row = CreateFrame("Button", nil, scrollChild)
             row:SetHeight(ROW_HEIGHT)
             row:SetPoint("TOPLEFT", 0, -(displayIdx - 1) * ROW_HEIGHT)
@@ -496,22 +466,18 @@ function ns:InitSettings()
 
             local timeText = row:CreateFontString(nil, "ARTWORK", FONT_DATA)
             timeText:SetPoint("LEFT", 0, 0)
-            timeText:SetText(date("%m/%d %H:%M", e.time))
+            timeText:SetText(r.time)
 
             local statusText = row:CreateFontString(nil, "ARTWORK", FONT_DATA)
             statusText:SetPoint("LEFT", 90, 0)
-            if e.success then
-                statusText:SetText("|cFF00FF00" .. L.HISTORY_OK .. "|r")
-            else
-                statusText:SetText("|cFFFF0000" .. L.HISTORY_FAIL .. "|r")
-            end
+            statusText:SetText(r.status)
 
             local partnerText = row:CreateFontString(nil, "ARTWORK", FONT_DATA)
             partnerText:SetPoint("LEFT", 140, 0)
             partnerText:SetWidth(80)
             partnerText:SetJustifyH("LEFT")
             partnerText:SetWordWrap(false)
-            partnerText:SetText(e.partner or "?")
+            partnerText:SetText(r.partner)
 
             -- Split frame for 1:1 Sent/Recv
             local splitFrame = CreateFrame("Frame", nil, row)
@@ -525,7 +491,7 @@ function ns:InitSettings()
             sentText:SetJustifyH("LEFT")
             sentText:SetWordWrap(false)
             sentText:SetMaxLines(1)
-            sentText:SetText(FormatEntryItems(e.myItems, e.myGold))
+            sentText:SetText(r.sent)
 
             local recvText = splitFrame:CreateFontString(nil, "ARTWORK", FONT_DATA)
             recvText:SetPoint("LEFT", splitFrame, "CENTER", 4, 0)
@@ -533,7 +499,7 @@ function ns:InitSettings()
             recvText:SetJustifyH("LEFT")
             recvText:SetWordWrap(false)
             recvText:SetMaxLines(1)
-            recvText:SetText(FormatEntryItems(e.theirItems, e.theirGold))
+            recvText:SetText(r.recv)
 
             historyRows[#historyRows + 1] = row
         end
@@ -620,15 +586,12 @@ function ns:InitSettings()
             chText:SetWidth(75)
             chText:SetJustifyH("LEFT")
             chText:SetWordWrap(false)
-            local chDisplay = L["AUTO_MSG_CH_" .. entry.channel] or entry.channel
-            if entry.channel == "WHISPER" and entry.target and entry.target ~= "" then
-                chDisplay = chDisplay .. ": " .. entry.target
-            end
-            chText:SetText(chDisplay)
+            local text = ns:AutoMessageRow(entry)
+            chText:SetText(text.channel)
 
             local intText = row:CreateFontString(nil, "ARTWORK", FONT_DATA)
             intText:SetPoint("LEFT", COL_INTERVAL - COL_CHANNEL, 0)
-            intText:SetText(string.format(L.AUTO_MSG_SEC, entry.interval or 60))
+            intText:SetText(text.interval)
 
             local delBtn = CreateSmallButton(row, 46, L.AUTO_MSG_DELETE, function()
                 ns:StopAutoMessage(i)
@@ -643,8 +606,7 @@ function ns:InitSettings()
             end)
             editBtn:SetPoint("RIGHT", delBtn, "LEFT", -4, 0)
 
-            local toggleBtn = CreateSmallButton(row, 50,
-                entry.enabled and L.AUTO_MSG_ON or L.AUTO_MSG_OFF,
+            local toggleBtn = CreateSmallButton(row, 50, text.toggle,
                 function()
                     entry.enabled = not entry.enabled
                     ns:RestartAllAutoMessages()
@@ -658,9 +620,9 @@ function ns:InitSettings()
             msgText:SetJustifyH("LEFT")
             msgText:SetWordWrap(false)
             msgText:SetMaxLines(1)
-            msgText:SetText((entry.message or ""):gsub("\n", " "))
+            msgText:SetText(text.message)
 
-            if not entry.enabled or not ns:IsAutoMessageChannel(entry.channel) then
+            if text.dimmed then
                 chText:SetTextColor(0.5, 0.5, 0.5)
                 intText:SetTextColor(0.5, 0.5, 0.5)
                 msgText:SetTextColor(0.5, 0.5, 0.5)

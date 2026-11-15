@@ -5,9 +5,9 @@
 | 항목 | 값 |
 | --- | --- |
 | 문서명 | spec_trade_history |
-| 작성일 / 최종 수정일 | 2026-11-14 / 2026-11-14 |
+| 작성일 / 최종 수정일 | 2026-11-14 / 2026-11-15 |
 | 버전 | 1.0 |
-| 기준 커밋 ID | d0dd1ce |
+| 기준 커밋 ID | f6d2cde |
 
 - **기능명:** 거래 장부 저장·정리·삭제·조회 (UC2)
 - **목적 (Why):** 채팅 알림은 지나가면 사라진다 → 최근 거래를 게임 안에서 다시 확인할 수 있게 남긴다.
@@ -55,6 +55,10 @@
 - `TradeLedgerDB.history`: `{ enabled = true, maxEntries = 50, entries = { ... } }` (오래된 것부터 순서대로)
 - 항목: `{ time = <time()>, partner = string, myItems = {[slot] = {name, quantity}}, theirItems = {...}, myGold = number, theirGold = number, success = boolean }`
 - `ns:SaveTrade(partner, myItems, theirItems, myGold, theirGold, success)`, `ns:PruneHistory()`, `ns:ClearHistory()`
+- 장부 패널 문자열 (FR#13)
+  - `ns:FormatEntryItems(items, gold)`: 한 쪽 아이템·골드 요약
+  - `ns:HistoryRows()`: 최신 항목이 앞인 목록. 줄마다 `{ entry, time = "월/일 시:분", status = 색 붙은 결과, partner, sent, recv }`
+  - `ns:HistoryDetail(entry)`: `{ time = "연-월-일 시:분:초", status, partner, sent, recv }`
 
 ## 6. 동작 로직 및 정책
 
@@ -73,8 +77,10 @@
 | `TC#16` | 기본 최대 50, 최대 3 에서 5건 저장 → 마지막 3건 | [FR#10] | `Core/History.test.lua` |
 | `TC#17` | 로드 시 7일+1초·30일 지난 항목 삭제, 정확히 7일·방금 항목 유지, 로드 뒤 저장할 때는 오래된 항목을 지우지 않음 | [FR#11, D#5] | `Core/History.test.lua` |
 | `TC#18` | 전체 삭제 → 빈 장부·삭제 안내·패널 갱신, 패널 없이도 오류 없음 | [FR#12] | `Core/History.test.lua` |
-| `TC#19` | 장부 패널 목록 순서·열·색, 줄 선택 상세, 빈 장부 안내, 켜기 체크박스 저장, 삭제 버튼 확인 대화상자 | [FR#12, FR#13] | (수동) 게임 내 → 목록·상세 문자열은 #16 에서 자동 테스트로 |
+| `TC#19` | 장부 패널 열 배치, 줄 선택 강조와 상세 표시, 빈 장부 안내, 켜기 체크박스 저장, 삭제 버튼 확인 대화상자 | [FR#12, FR#13] | (수동) 게임 내. 목록·상세 문자열은 TC#35 |
+| `TC#35` | 목록이 최신 순, 줄·상세의 시각 형식, 결과 색(성공 초록·취소 빨강, enUS·koKR), 상대 없음 → `?`, 요약: 슬롯 순서·수량 2 이상 ` x{수량}`·골드 끝·비면 `-` | [FR#13] | `Core/History.test.lua` |
 
 ## 부록. 변경 이력
 
 - GH-12: as-built 스펙 작성
+- GH-16: 장부 목록·상세 문자열을 Core 로 옮겨 TC#35 자동화

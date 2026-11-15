@@ -244,8 +244,7 @@ function ns:ShowAutoMessageDialog(editIndex, onSave)
         if entry then
             f.selectedChannel = self:AutoMessageDialogChannel(entry)
             UIDropDownMenu_SetText(f.dropdown, GetChannelDisplay(f.selectedChannel))
-            local interval = entry.interval or 60
-            interval = math.max(INTERVAL_MIN, math.min(INTERVAL_MAX, interval))
+            local interval = self:AutoMessageDialogInterval(entry)
             f.slider:SetValue(interval)
             f.UpdateSliderText(interval)
             f.messageEdit:SetText(entry.message or "")

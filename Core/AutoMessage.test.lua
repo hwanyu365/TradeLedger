@@ -140,3 +140,29 @@ describe("AutoMessage channels", function()
         eq(last, "|cFF00CCFF[TradeLedger]|r 거래 채널 자동 메시지는 WoW 가 막아 보내지 않습니다. 다른 채널로 편집하거나 삭제하세요.")
     end)
 end)
+
+describe("AutoMessage panel text", function()
+    it("TC#36 패널 줄은 채널·간격·한 줄 메시지·켜기/끄기 문구와 회색 여부를 주고, 대화상자 간격은 60 기본에 10~600 으로 맞춘다", function()
+        local ns = support.addon()
+        eq(ns:AutoMessageRow({ channel = "WHISPER", target = "Bob", interval = 30, message = "a\nb", enabled = true }),
+            { channel = "Whisper: Bob", interval = "30s", message = "a b", toggle = "ON", dimmed = false })
+        eq(ns:AutoMessageRow({ channel = "WHISPER", target = "", message = "m", enabled = true }),
+            { channel = "Whisper", interval = "60s", message = "m", toggle = "ON", dimmed = false })
+        local guild = ns:AutoMessageRow({ channel = "GUILD", interval = 10, enabled = false })
+        eq(guild, { channel = "Guild", interval = "10s", message = "", toggle = "OFF", dimmed = true })
+        local trade = ns:AutoMessageRow({ channel = "TRADE", interval = 10, message = "t", enabled = true })
+        eq(trade.channel, "Trade")
+        eq(trade.dimmed, true)
+        eq(ns:AutoMessageRow({ channel = "ODD", interval = 10, enabled = true }).channel, "ODD")
+
+        local ko = support.addon({ locale = "koKR" })
+        eq(ko:AutoMessageRow({ channel = "WHISPER", target = "밥", interval = 30, message = "m", enabled = false }),
+            { channel = "귓속말: 밥", interval = "30초", message = "m", toggle = "비활성", dimmed = true })
+
+        eq(ns:AutoMessageDialogInterval(nil), 60)
+        eq(ns:AutoMessageDialogInterval({}), 60)
+        eq(ns:AutoMessageDialogInterval({ interval = 3 }), 10)
+        eq(ns:AutoMessageDialogInterval({ interval = 45 }), 45)
+        eq(ns:AutoMessageDialogInterval({ interval = 900 }), 600)
+    end)
+end)

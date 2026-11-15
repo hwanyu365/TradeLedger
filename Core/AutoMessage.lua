@@ -21,6 +21,26 @@ function ns:AutoMessageDialogChannel(entry)
     return self.AUTO_MSG_CHANNELS[1]
 end
 
+function ns:AutoMessageDialogInterval(entry)
+    local interval = entry and entry.interval or 60
+    return math.max(self.AUTO_MSG_INTERVAL_MIN, math.min(self.AUTO_MSG_INTERVAL_MAX, interval))
+end
+
+function ns:AutoMessageRow(entry)
+    local L = self.L
+    local channel = L["AUTO_MSG_CH_" .. entry.channel] or entry.channel
+    if entry.channel == "WHISPER" and entry.target and entry.target ~= "" then
+        channel = channel .. ": " .. entry.target
+    end
+    return {
+        channel  = channel,
+        interval = string.format(L.AUTO_MSG_SEC, entry.interval or 60),
+        message  = (entry.message or ""):gsub("\n", " "),
+        toggle   = entry.enabled and L.AUTO_MSG_ON or L.AUTO_MSG_OFF,
+        dimmed   = not entry.enabled or not self:IsAutoMessageChannel(entry.channel),
+    }
+end
+
 function ns:NotifyUnsendableAutoMessages()
     for _, entry in ipairs(self.db.autoMessages) do
         if not self:IsAutoMessageChannel(entry.channel) then
