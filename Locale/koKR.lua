@@ -10,7 +10,8 @@ L.TRADE_REQUEST_FROM  = "%s님이 거래를 요청합니다"
 L.SENT                = "보냄"
 L.RECV                = "받음"
 L.NOTHING             = "없음"
-L.LOADED              = "v1.0.2 로드됨. /tl 로 설정 패널 열기"
+L.LOADED              = "v%s 로드됨. /tl 로 설정 패널 열기"
+L.ADDON_DESC          = "거래 완료/취소 시 채팅 채널에 알리고 거래 장부를 기록합니다."
 L.HIGH_VALUE_TRADE    = "고액 거래: %s"
 
 -- Settings UI - Tabs
@@ -81,6 +82,6 @@ L.AUTO_MSG_ON             = "활성"
 L.AUTO_MSG_OFF            = "비활성"
 
 -- Settings Reset
-L.SETTINGS_RESET          = "모든 설정이 초기화되었습니다."
+L.SETTINGS_RESET          = "모든 설정이 초기화되었습니다. 자동 메시지와 거래 기록도 삭제되었습니다."
 L.SETTINGS_RESET_BTN      = "설정 초기화"
-L.SETTINGS_RESET_CONFIRM  = "모든 TradeLedger 설정을 초기화하시겠습니까?\n\n자동 메시지 설정 등 모든 설정이 기본값으로 복원됩니다."
+L.SETTINGS_RESET_CONFIRM  = "모든 TradeLedger 설정을 초기화하시겠습니까?\n\n모든 설정이 기본값으로 복원되고, 자동 메시지와 거래 기록이 모두 삭제됩니다. 되돌릴 수 없습니다."
