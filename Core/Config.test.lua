@@ -43,12 +43,13 @@ describe("Config", function()
         eq(ns.db.announceSuccess, true)
     end)
 
-    it("TC#3 TradeLedgerDB 가 없고 옛 TradeAnnounceDB 가 있으면 그 표를 옮기고, 둘 다 있으면 TradeLedgerDB 를 쓴다", function()
+    it("TC#3 옛 이름 TradeAnnounceDB 는 읽지도 지우지도 않는다", function()
         local old = { goldThreshold = 77 }
         local ns = support.addon({ db = nil, oldDb = old })
-        eq(rawequal(ns.db, old), true)
-        eq(TradeAnnounceDB, nil)
-        eq(ns.db.goldThreshold, 77)
+        eq(rawequal(ns.db, old), false)
+        eq(ns.db.goldThreshold, 1000)
+        eq(rawequal(TradeAnnounceDB, old), true)
+        eq(old, { goldThreshold = 77 })
 
         local current = { goldThreshold = 1 }
         local old2 = { goldThreshold = 2 }
