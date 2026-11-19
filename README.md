@@ -2,8 +2,6 @@
 
 Trade completion/cancellation announcements and trade history ledger for World of Warcraft.
 
-거래 완료/취소 시 채팅 채널에 알리고 거래 장부를 기록합니다.
-
 ## Features
 
 - **Trade Alerts**: Automatically announce trade results to Party, Raid, Guild, or Whisper channels
